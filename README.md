@@ -7,6 +7,7 @@ hands-on lab covering common MCP server vulnerabilities, malicious server attack
 - python 3.10+
 - fastmcp
 - requests
+- anthropic (only needed for `src/llm_host.py`)
 
 ```
 pip install -r requirements.txt
@@ -50,13 +51,9 @@ python src/malicious_server.py
 python src/client.py --url http://127.0.0.1:8002/mcp/ --attack enumerate
 ```
 
+to see the attacks play out with a live LLM, use `src/llm_host.py` (see **llm host** below).
+
 exfiltrated data is written to `results/exfiltrated.log`.
-
-**regenerate screenshots:**
-
-```
-python src/make_screenshots.py
-```
 
 ## results
 
@@ -124,4 +121,24 @@ a malicious MCP server embeds hidden `<IMPORTANT>` instructions in tool descript
 
 ---
 
-note: the malicious server attacks (tool poisoning, rug pull, tool shadowing) require an LLM host to demonstrate full impact — the screenshots show how the poisoned descriptions look during enumeration. all vulnerable-server attacks run without an LLM.
+## llm host
+
+`src/llm_host.py` wires an LLM to an MCP server and runs a chat loop. connecting it to the malicious server shows tool poisoning, rug pull, and tool shadowing in practice: the model receives poisoned tool descriptions, those hidden `<IMPORTANT>` instructions land in its context window, and its behavior is redirected (exfiltrating prompts, silently reading files) without the user seeing anything unusual.
+
+set your api key and start both processes:
+
+```
+export ANTHROPIC_API_KEY=sk-ant-...
+python src/malicious_server.py                  # terminal 1
+python src/llm_host.py --server malicious       # terminal 2
+```
+
+compare against the secure server to see mitigations in effect:
+
+```
+python src/llm_host.py --server secure
+```
+
+the script uses `anthropic` and `claude-opus-4-8` by default. to swap providers, replace the `anthropic.Anthropic()` client in `src/llm_host.py` with your own and adjust the `messages.create()` call to match that sdk's shape.
+
+note: all vulnerable-server attacks (`--attack all`) run without an LLM. the llm host is only needed for the malicious server attacks.
