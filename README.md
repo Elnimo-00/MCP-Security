@@ -61,8 +61,6 @@ exfiltrated data is written to `results/exfiltrated.log`.
 
 the vulnerable server exposes 5 resource templates and 2 tools, including a logs endpoint and an unauthenticated document store.
 
-![enumerate](results/01_enumerate.png)
-
 ---
 
 ### attack 1  sensitive information disclosure
@@ -77,15 +75,11 @@ the vulnerable server exposes 5 resource templates and 2 tools, including a logs
 
 `document://{doc_id}` performs no ownership check. any caller can enumerate all documents by incrementing the ID.
 
-![idor](results/03_idor.png)
-
 ---
 
 ### attack 3  SQL injection
 
 the `price://{item}` template concatenates the parameter directly into a SQL query. a single quote confirms the injection; URL-encoded UNION SELECT payloads exfiltrate the full schema and data.
-
-![sqli](results/04_sqli.png)
 
 ---
 
@@ -93,15 +87,11 @@ the `price://{item}` template concatenates the parameter directly into a SQL que
 
 `execute_server_command` uses a substring allowlist check (`"date" in command`) instead of exact match, combined with `shell=True`. appending `;id` or `|cat /etc/passwd` bypasses the filter and executes arbitrary commands as the server process user.
 
-![cmdi](results/05_cmdi.png)
-
 ---
 
 ### attack 5 SSRF
 
 `fetch_price_data(url)` passes the caller-supplied URL directly to `requests.get`. open ports return `Success`, closed ports return `Connection refused`, enabling full internal port scanning. the internal quantity API (port 8001) is reachable without an API key.
-
-![ssrf](results/06_ssrf.png)
 
 ---
 
@@ -109,15 +99,11 @@ the `price://{item}` template concatenates the parameter directly into a SQL que
 
 parameterized queries, exact-match allowlist, scheme+hostname allowlist, input regex validation, and ownership checks block all five attack classes. allowed operations still work normally.
 
-![mitigations](results/07_mitigations.png)
-
 ---
 
 ### malicious server  tool poisoning
 
 a malicious MCP server embeds hidden `<IMPORTANT>` instructions in tool descriptions. these are injected into the LLM's context and instruct it to exfiltrate user prompts or read local files (`~/.ssh/id_rsa`) without the user's knowledge.
-
-![malicious tools](results/08_malicious_tools.png)
 
 ---
 
