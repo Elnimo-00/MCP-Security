@@ -1,6 +1,6 @@
 # mcp-security-lab
 
-hands-on lab covering common MCP server vulnerabilities, malicious server attack techniques, and their mitigations. mirrors the HTB "Attacking AI — Vulnerable/Malicious MCP Servers" curriculum.
+hands-on lab covering common MCP server vulnerabilities, malicious server attack techniques, and their mitigations. From the HTB "Attacking AI, Vulnerable/Malicious MCP Servers" curriculum.
 
 ## requirements
 
