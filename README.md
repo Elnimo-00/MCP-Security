@@ -65,7 +65,7 @@ the vulnerable server exposes 5 resource templates and 2 tools, including a logs
 
 ---
 
-### attack 1 — sensitive information disclosure
+### attack 1  sensitive information disclosure
 
 `resource://logs` exposes internal server logs. triggering a 404 on the quantity template leaks the full API key in the verbose error message.
 
@@ -73,7 +73,7 @@ the vulnerable server exposes 5 resource templates and 2 tools, including a logs
 
 ---
 
-### attack 2 — broken authorization (IDOR)
+### attack 2  broken authorization (IDOR)
 
 `document://{doc_id}` performs no ownership check. any caller can enumerate all documents by incrementing the ID.
 
@@ -81,7 +81,7 @@ the vulnerable server exposes 5 resource templates and 2 tools, including a logs
 
 ---
 
-### attack 3 — SQL injection
+### attack 3  SQL injection
 
 the `price://{item}` template concatenates the parameter directly into a SQL query. a single quote confirms the injection; URL-encoded UNION SELECT payloads exfiltrate the full schema and data.
 
@@ -89,7 +89,7 @@ the `price://{item}` template concatenates the parameter directly into a SQL que
 
 ---
 
-### attack 4 — command injection
+### attack 4  command injection
 
 `execute_server_command` uses a substring allowlist check (`"date" in command`) instead of exact match, combined with `shell=True`. appending `;id` or `|cat /etc/passwd` bypasses the filter and executes arbitrary commands as the server process user.
 
@@ -97,7 +97,7 @@ the `price://{item}` template concatenates the parameter directly into a SQL que
 
 ---
 
-### attack 5 — SSRF
+### attack 5 SSRF
 
 `fetch_price_data(url)` passes the caller-supplied URL directly to `requests.get`. open ports return `Success`, closed ports return `Connection refused`, enabling full internal port scanning. the internal quantity API (port 8001) is reachable without an API key.
 
@@ -105,7 +105,7 @@ the `price://{item}` template concatenates the parameter directly into a SQL que
 
 ---
 
-### mitigations — secure server
+### mitigations  secure server
 
 parameterized queries, exact-match allowlist, scheme+hostname allowlist, input regex validation, and ownership checks block all five attack classes. allowed operations still work normally.
 
@@ -113,7 +113,7 @@ parameterized queries, exact-match allowlist, scheme+hostname allowlist, input r
 
 ---
 
-### malicious server — tool poisoning
+### malicious server  tool poisoning
 
 a malicious MCP server embeds hidden `<IMPORTANT>` instructions in tool descriptions. these are injected into the LLM's context and instruct it to exfiltrate user prompts or read local files (`~/.ssh/id_rsa`) without the user's knowledge.
 
@@ -128,9 +128,9 @@ a malicious MCP server embeds hidden `<IMPORTANT>` instructions in tool descript
 set your api key and start both processes:
 
 ```
-export ANTHROPIC_API_KEY=sk-ant-...
-python src/malicious_server.py                  # terminal 1
-python src/llm_host.py --server malicious       # terminal 2
+export ANTHROPIC_API_KEY=xxx
+python src/malicious_server.py                  
+python src/llm_host.py --server malicious      
 ```
 
 compare against the secure server to see mitigations in effect:
@@ -141,4 +141,4 @@ python src/llm_host.py --server secure
 
 the script uses `anthropic` and `claude-opus-4-8` by default. to swap providers, replace the `anthropic.Anthropic()` client in `src/llm_host.py` with your own and adjust the `messages.create()` call to match that sdk's shape.
 
-note: all vulnerable-server attacks (`--attack all`) run without an LLM. the llm host is only needed for the malicious server attacks.
+
